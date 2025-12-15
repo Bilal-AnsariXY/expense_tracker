@@ -23,15 +23,15 @@ const generateRefreshToken = (id) => {
 const cookieOptions = {
   httpOnly: true,
   secure: isProduction, // true in prod
-  sameSite: isProduction ? 'lax' : 'lax', // works in dev for localhost
+  sameSite: "none", // works in dev for localhost
   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 const refreshCookieOptions = {
   httpOnly: true,
   secure: isProduction,
-  sameSite: isProduction ? 'lax' : 'lax',
-  maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  sameSite: "none",
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
 // ===============================
