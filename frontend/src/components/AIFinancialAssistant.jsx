@@ -1,21 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader, Sparkles, TrendingUp, DollarSign } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  MessageCircle,
+  X,
+  Send,
+  Loader,
+  Sparkles,
+  TrendingUp,
+  DollarSign,
+} from "lucide-react";
 
 const AIFinancialAssistant = ({ expenses = [], budget = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
-      role: 'assistant',
-      content: "Hi there 👋 I'm your AI financial assistant. How can I help with your finances today? 😊",
-      timestamp: new Date()
-    }
+      role: "assistant",
+      content:
+        "Hi there 👋 I'm your AI financial assistant. How can I help with your finances today? 😊",
+      timestamp: new Date(),
+    },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -23,34 +32,51 @@ const AIFinancialAssistant = ({ expenses = [], budget = 0 }) => {
   }, [messages]);
 
   const quickActions = [
-    { icon: TrendingUp, text: 'Analyze my spending', prompt: 'Analyze my spending patterns' },
-    { icon: DollarSign, text: 'Budget advice', prompt: 'Give me budget advice' },
-    { icon: Sparkles, text: 'Savings tips', prompt: 'How can I save more money?' }
+    {
+      icon: TrendingUp,
+      text: "Analyze my spending",
+      prompt: "Analyze my spending patterns",
+    },
+    {
+      icon: DollarSign,
+      text: "Budget advice",
+      prompt: "Give me budget advice",
+    },
+    {
+      icon: Sparkles,
+      text: "Savings tips",
+      prompt: "How can I save more money?",
+    },
   ];
 
   const sendMessage = async (messageText = inputMessage) => {
     if (!messageText.trim() && !inputMessage.trim()) return;
 
     // ✅ FIXED: Check if user has expenses
-    if (expenses.length === 0 && !messageText.toLowerCase().includes('hello') && !messageText.toLowerCase().includes('hi')) {
+    if (
+      expenses.length === 0 &&
+      !messageText.toLowerCase().includes("hello") &&
+      !messageText.toLowerCase().includes("hi")
+    ) {
       const noExpenseMessage = {
-        role: 'assistant',
-        content: "I notice you don't have any expenses yet. Start adding expenses to get personalized financial advice! In the meantime, I can answer general finance questions. 💡",
-        timestamp: new Date()
+        role: "assistant",
+        content:
+          "I notice you don't have any expenses yet. Start adding expenses to get personalized financial advice! In the meantime, I can answer general finance questions. 💡",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, noExpenseMessage]);
-      setInputMessage('');
+      setMessages((prev) => [...prev, noExpenseMessage]);
+      setInputMessage("");
       return;
     }
 
     const userMessage = {
-      role: 'user',
+      role: "user",
       content: messageText || inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
     setLoading(true);
 
     try {
@@ -66,18 +92,21 @@ const AIFinancialAssistant = ({ expenses = [], budget = 0 }) => {
         remaining: budget - totalSpent,
         expenseCount: expenses.length,
         categories: categoryBreakdown,
-        averageDaily: expenses.length > 0 ? totalSpent / 30 : 0
+        averageDaily: expenses.length > 0 ? totalSpent / 30 : 0,
       };
 
-      const response = await fetch('http://localhost:5000/api/chat/message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          message: messageText || inputMessage,
-          context: financialContext
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/chat/message`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            message: messageText || inputMessage,
+            context: financialContext,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -87,22 +116,23 @@ const AIFinancialAssistant = ({ expenses = [], budget = 0 }) => {
 
       if (data.success) {
         const assistantMessage = {
-          role: 'assistant',
+          role: "assistant",
           content: data.response,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, assistantMessage]);
       } else {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error(data.error || "Failed to get response");
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error("Chat error:", error);
       const errorMessage = {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again. If the problem persists, check your internet connection.',
-        timestamp: new Date()
+        role: "assistant",
+        content:
+          "Sorry, I encountered an error. Please try again. If the problem persists, check your internet connection.",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -119,17 +149,17 @@ const AIFinancialAssistant = ({ expenses = [], budget = 0 }) => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendClick();
     }
   };
 
   const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+    return new Date(date).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -177,19 +207,25 @@ const AIFinancialAssistant = ({ expenses = [], budget = 0 }) => {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
                   className={`max-w-[80%] rounded-2xl p-3 ${
-                    message.role === 'user'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white text-gray-900 border border-gray-200'
+                    message.role === "user"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white text-gray-900 border border-gray-200"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
                   <p
                     className={`text-xs mt-1 ${
-                      message.role === 'user' ? 'text-indigo-200' : 'text-gray-500'
+                      message.role === "user"
+                        ? "text-indigo-200"
+                        : "text-gray-500"
                     }`}
                   >
                     {formatTime(message.timestamp)}

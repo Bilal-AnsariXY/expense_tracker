@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { DollarSign, Mail, Lock, User, ArrowRight, Shield } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { DollarSign, Mail, Lock, User, ArrowRight, Shield } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [timer, setTimer] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
 
@@ -22,7 +22,7 @@ const Register = () => {
     let interval;
     if (timerActive && timer > 0) {
       interval = setInterval(() => {
-        setTimer(prev => prev - 1);
+        setTimer((prev) => prev - 1);
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -31,60 +31,63 @@ const Register = () => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleRequestOTP = async () => {
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (!formData.name || !formData.email || !formData.password) {
-      setError('All fields are required');
+      setError("All fields are required");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/request-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          name: formData.name
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/request-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('OTP sent to your email! Check your inbox.');
+        setSuccess("OTP sent to your email! Check your inbox.");
         setStep(2);
         setTimer(600);
         setTimerActive(true);
       } else {
-        setError(data.error || 'Failed to send OTP');
+        setError(data.error || "Failed to send OTP");
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -103,41 +106,44 @@ const Register = () => {
   };
 
   const handleVerifyOTP = async () => {
-    const otpCode = otp.join('');
+    const otpCode = otp.join("");
 
     if (otpCode.length !== 6) {
-      setError('Please enter complete OTP');
+      setError("Please enter complete OTP");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email,
-          otp: otpCode,
-          password: formData.password,
-          name: formData.name
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email: formData.email,
+            otp: otpCode,
+            password: formData.password,
+            name: formData.name,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Registration successful! Redirecting...');
+        setSuccess("Registration successful! Redirecting...");
         setTimeout(() => {
-          navigate('/setup');
+          navigate("/setup");
         }, 1500);
       } else {
-        setError(data.error || 'Invalid OTP');
+        setError(data.error || "Invalid OTP");
       }
     } catch (err) {
-      setError('Failed to verify OTP');
+      setError("Failed to verify OTP");
     } finally {
       setLoading(false);
     }
@@ -145,27 +151,30 @@ const Register = () => {
 
   const handleResendOTP = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/resend-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('New OTP sent to your email!');
+        setSuccess("New OTP sent to your email!");
         setTimer(600);
         setTimerActive(true);
-        setOtp(['', '', '', '', '', '']);
+        setOtp(["", "", "", "", "", ""]);
       } else {
         setError(data.error);
       }
     } catch (err) {
-      setError('Failed to resend OTP');
+      setError("Failed to resend OTP");
     } finally {
       setLoading(false);
     }
@@ -176,13 +185,19 @@ const Register = () => {
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="bg-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            {step === 1 ? <DollarSign className="w-8 h-8 text-white" /> : <Shield className="w-8 h-8 text-white" />}
+            {step === 1 ? (
+              <DollarSign className="w-8 h-8 text-white" />
+            ) : (
+              <Shield className="w-8 h-8 text-white" />
+            )}
           </div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {step === 1 ? 'Create Account' : 'Verify Email'}
+            {step === 1 ? "Create Account" : "Verify Email"}
           </h1>
           <p className="text-gray-600 mt-2">
-            {step === 1 ? 'Join Smart Expense Tracker' : `Enter the OTP sent to ${formData.email}`}
+            {step === 1
+              ? "Join Smart Expense Tracker"
+              : `Enter the OTP sent to ${formData.email}`}
           </p>
         </div>
 
@@ -265,7 +280,7 @@ const Register = () => {
               disabled={loading}
               className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center space-x-2"
             >
-              <span>{loading ? 'Sending OTP...' : 'Continue'}</span>
+              <span>{loading ? "Sending OTP..." : "Continue"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -289,7 +304,9 @@ const Register = () => {
 
             <div className="text-center">
               <span className="text-gray-600">Time remaining: </span>
-              <span className="font-bold text-indigo-600">{formatTime(timer)}</span>
+              <span className="font-bold text-indigo-600">
+                {formatTime(timer)}
+              </span>
             </div>
 
             <button
@@ -297,7 +314,7 @@ const Register = () => {
               disabled={loading || timer === 0}
               className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
             >
-              {loading ? 'Verifying...' : 'Verify & Create Account'}
+              {loading ? "Verifying..." : "Verify & Create Account"}
             </button>
 
             <div className="flex space-x-2">
@@ -312,7 +329,7 @@ const Register = () => {
                 onClick={() => {
                   setStep(1);
                   setTimerActive(false);
-                  setOtp(['', '', '', '', '', '']);
+                  setOtp(["", "", "", "", "", ""]);
                 }}
                 className="flex-1 text-gray-600 py-2 rounded-lg font-medium hover:bg-gray-50 transition text-sm"
               >
@@ -324,9 +341,9 @@ const Register = () => {
 
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate("/login")}
               className="text-indigo-600 font-semibold hover:underline"
             >
               Login

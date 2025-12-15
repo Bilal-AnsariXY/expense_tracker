@@ -46,19 +46,22 @@ const InitialSetup = () => {
       const monthlyBudget = parseFloat(formData.monthlyIncome) * 0.8;
       const weeklyBudget = monthlyBudget / 4;
 
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          monthlyBudget,
-          weeklyBudget,
-          preferences: {
-            currency: formData.currency
-          },
-          setupCompleted: true
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/profile`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            monthlyBudget,
+            weeklyBudget,
+            preferences: {
+              currency: formData.currency,
+            },
+            setupCompleted: true,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -86,12 +89,15 @@ const InitialSetup = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ setupCompleted: true })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/profile`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ setupCompleted: true }),
+        }
+      );
 
       const data = await response.json();
 
